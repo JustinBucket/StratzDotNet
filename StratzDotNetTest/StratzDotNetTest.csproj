@@ -18,4 +18,8 @@
     <ProjectReference Include="..\StratzDotNet\StratzDotNet.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Hero.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
 </Project>
