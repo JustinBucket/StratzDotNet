@@ -5,13 +5,11 @@ using System.Threading.Tasks;
 
 namespace StratzDotNet.Models
 {
-    public class Language
+    public class HeroRole
     {
+        public int RoleId { get; set; }
+        public int Level { get; set; }
         public int HeroId { get; set; }
         public int GameVersionId { get; set; }
-        public int LanguageId { get; set; }
-        public string DisplayName { get; set; }
-        public string Bio { get; set; }
-        public string Hype { get; set; }
     }
 }

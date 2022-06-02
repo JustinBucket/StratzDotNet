@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 namespace StratzDotNet.Models
 {
-    public class Role
+    public class Region
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string LangKey { get; set; }
+        public int RegionId { get; set; }
     }
 }

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Content Include="Hero.json" CopyToOutputDirectory="Always" />
+    <Content Include="Ability.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
 </Project>

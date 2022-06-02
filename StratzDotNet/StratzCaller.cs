@@ -1,38 +1,81 @@
 ﻿using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using StratzDotNet.Models;
 
 namespace StratzDotNet;
 public class StratzCaller : HttpClient
 {
-    public StratzCaller()
+    private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings();
+
+    public StratzCaller(string apiKey = "", bool enableJsonTrace = false)
     {
         BaseAddress = new Uri("https://api.stratz.com/api/v1/");
+        
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            apiKey = Helpers.GetApiKey().Result;
+        }
 
-        var apiKey = Helpers.GetApiKey().Result;
+        if (enableJsonTrace)
+        {
+            ITraceWriter traceWriter = new MemoryTraceWriter();
+            _serializerSettings.TraceWriter = traceWriter;
+            _serializerSettings.Converters.Add(new JavaScriptDateTimeConverter());
+        }
+
         DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", apiKey);
     }
 
-    public async Task<List<GameVersion>> GetGameVersionAsync()
+    private async Task<T> HandleCall<T>(string path)
     {
-        var response = await GetAsync("GameVersion");
+        var response = await GetAsync(path);
 
         var content = await response.Content.ReadAsStringAsync();
 
-        // parse the result
-        var gameVersions = JsonConvert.DeserializeObject<List<GameVersion>>(content);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Request failed: {response.StatusCode}, {content}");
+        }
+
+        var returnObject = JsonConvert.DeserializeObject<T>(content, _serializerSettings);
+
+        return returnObject;
+    }
+
+    public async Task<List<GameVersion>> GetGameVersionAsync()
+    {
+        var gameVersions = await HandleCall<List<GameVersion>>("gameVersion");
 
         return gameVersions;
     }
 
+    public async Task<List<Region>> GetRegionsAsync()
+    {
+        var regions = await HandleCall<List<Region>>("cluster");
+
+        return regions;
+    }
+
+    public async Task<List<Ability>> GetAbilitiesAsync()
+    {
+        var abilitiesDict = await HandleCall<Dictionary<string, Ability>>("ability");
+
+        var abilities = new List<Ability>();
+
+        foreach (var i in abilitiesDict)
+        {
+            abilities.Add(i.Value);
+        }
+
+        return abilities;
+    }
+
     public async Task<List<GameMode>> GetGameModesAsync()
     {
-        var response = await GetAsync("GameMode");
-
-        var content = await response.Content.ReadAsStringAsync();
-
-        var gameModesDict = JsonConvert.DeserializeObject<Dictionary<string, GameMode>>(content);
+        var gameModesDict = await HandleCall<Dictionary<string, GameMode>>("gameMode");
 
         var gameModes = new List<GameMode>();
 
@@ -46,11 +89,7 @@ public class StratzCaller : HttpClient
 
     public async Task<List<Hero>> GetHeroesAsync()
     {
-        var response = await GetAsync("hero");
-
-        var content = await response.Content.ReadAsStringAsync();
-
-        var heroesDict = JsonConvert.DeserializeObject<Dictionary<string, Hero>>(content);
+        var heroesDict = await HandleCall<Dictionary<string, Hero>>("hero");
 
         var heroes = new List<Hero>();
 
@@ -60,6 +99,13 @@ public class StratzCaller : HttpClient
         }
 
         return heroes;
+    }
+
+    public async Task<List<Role>> GetRolesAsync()
+    {
+        var roles = await HandleCall<List<Role>>("hero/roles");
+
+        return roles;
     }
 
 }

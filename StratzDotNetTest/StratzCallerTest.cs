@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using StratzDotNet;
 using StratzDotNet.Models;
 
@@ -14,7 +16,7 @@ public class UnitTest1
     [TestMethod]
     public void TestBaseUriAssignment()
     {
-        using (var caller = new StratzCaller())
+        using (var caller = new StratzCaller("", true))
         {
             Assert.AreEqual("https://api.stratz.com/api/v1/", caller.BaseAddress.AbsoluteUri);
         }
@@ -23,7 +25,7 @@ public class UnitTest1
     [TestMethod]
     public void TestGetGameVersion()
     {
-        using (var caller = new StratzCaller())
+        using (var caller = new StratzCaller("", true))
         {
             var gameVersionResponse = caller.GetGameVersionAsync().Result;
 
@@ -42,9 +44,9 @@ public class UnitTest1
     }
 
     [TestMethod]
-    public void TestGetModesAsync()
+    public void TestGetModes()
     {
-        using (var caller = new StratzCaller())
+        using (var caller = new StratzCaller("", true))
         {
             var gameModes = caller.GetGameModesAsync().Result;
 
@@ -65,9 +67,9 @@ public class UnitTest1
     }
 
     [TestMethod]
-    public void TestGetHeroesAsync()
+    public void TestGetHeroes()
     {
-        using (var caller = new StratzCaller())
+        using (var caller = new StratzCaller("", true))
         {
             var heroes = caller.GetHeroesAsync().Result;
 
@@ -80,8 +82,78 @@ public class UnitTest1
             Assert.AreEqual(123, heroes.Count);
             Assert.AreEqual(expectedHero.Id, firstHero.Id);
             Assert.AreEqual(expectedHero.ShortName, firstHero.ShortName);
-            Assert.AreEqual(expectedHero.Abilities.Count, firstHero.Abilities.Count);
+            Assert.AreEqual(expectedHero.HeroAbilities.Count, firstHero.HeroAbilities.Count);
             Assert.AreEqual(expectedHero.Stat.StrengthBase, firstHero.Stat.StrengthBase);
+        }
+    }
+
+    [TestMethod]
+    public void TestGetAbilities()
+    {
+        // sometimes language is not present in the read string
+        using (var caller = new StratzCaller("", true))
+        {
+            var abilities = caller.GetAbilitiesAsync().Result;
+
+            var abilityJson = File.ReadAllText("Ability.json");
+
+            // put deserializer tracewriter here
+            
+            ITraceWriter traceWriter = new MemoryTraceWriter();
+
+            var expectedAbility = JsonConvert.DeserializeObject<Ability>(abilityJson, new JsonSerializerSettings { TraceWriter = traceWriter, Converters = { new JavaScriptDateTimeConverter() } });
+            Console.WriteLine(traceWriter);
+            var targetAbility = abilities.FirstOrDefault(x => x.Id == 9999);
+
+            Assert.AreEqual(expectedAbility.Name, targetAbility.Name);
+            Assert.AreEqual(expectedAbility.AbilityLanguage.DisplayName, targetAbility.AbilityLanguage.DisplayName);
+            Assert.AreEqual(expectedAbility.AbilityStat.Behavior, targetAbility.AbilityStat.Behavior);
+            Assert.AreEqual(expectedAbility.IsTalent, targetAbility.IsTalent);
+            Assert.AreEqual(expectedAbility.AbilityStat.MaxLevel, targetAbility.AbilityStat.MaxLevel);
+            Assert.AreEqual(expectedAbility.AbilityStat.CastRanges[0], targetAbility.AbilityStat.CastRanges[0]);
+        }
+
+    }
+
+    [TestMethod]
+    public void TestGetRegions()
+    {
+        using (var caller = new StratzCaller("", true))
+        {
+            var regions = caller.GetRegionsAsync().Result;
+
+            var expectedRegion = new Region()
+            {
+                Id = 111,
+                RegionId = 1
+            };
+
+            var firstRegion = regions.First();
+
+            Assert.AreEqual(expectedRegion.Id, firstRegion.Id);
+            Assert.AreEqual(expectedRegion.RegionId, firstRegion.RegionId);
+        }
+    }
+
+    [TestMethod]
+    public void TestGetRoles()
+    {
+        using (var caller = new StratzCaller("", true))
+        {
+            var roles = caller.GetRolesAsync().Result;
+
+            var expectedRole = new Role()
+            {
+                Id = 0,
+                Name = "Carry",
+                LangKey = "roles.carry"
+            };
+
+            var firstRole = roles.First();
+
+            Assert.AreEqual(expectedRole.Id, firstRole.Id);
+            Assert.AreEqual(expectedRole.Name, firstRole.Name);
+            Assert.AreEqual(expectedRole.LangKey, firstRole.LangKey);
         }
     }
 }
