@@ -5,9 +5,7 @@ using System.Threading.Tasks;
 
 namespace StratzDotNet.Models.GraphQl
 {
-    public class Match
+    public class IgnoreAttribute : Attribute
     {
-        public bool DidRadiantWin { get; set; }
-        public int DurationSeconds { get; set; }
     }
 }
