@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace StratzDotNet.Models.GraphQl
 {
-    public class Data<T>
+    public class Match
     {
-        public T Result { get; set; }
+        public bool DidRadiantWin { get; set; }
+        public int DurationSeconds { get; set; }
     }
 }

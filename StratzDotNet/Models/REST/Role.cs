@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace StratzDotNet.Models
+namespace StratzDotNet.Models.Rest
 {
     public class Role
     {

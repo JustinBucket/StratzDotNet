@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace StratzDotNet.Models
+namespace StratzDotNet.Models.Rest
 {
     public class Hero
     {

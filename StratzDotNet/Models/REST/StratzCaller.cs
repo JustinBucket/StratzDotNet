@@ -2,9 +2,9 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using StratzDotNet.Models;
+using StratzDotNet.Models.Rest;
 
-namespace StratzDotNet;
+namespace StratzDotNet.Rest;
 public class StratzCaller : HttpClient
 {
     private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings();
